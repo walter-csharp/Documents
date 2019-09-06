@@ -5,7 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.5">
-<title>hello</title>
+<title>Docker</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
@@ -510,16 +510,210 @@ table.CodeRay td.code>pre{padding:0}
 .CodeRay .head .head{color:#f4f}
 </style>
 </head>
-<body class="article">
+<body class="article toc2 toc-left">
 <div id="header">
-<h1>hello</h1>
+<h1>Docker</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#create-docker-image">Create Docker Image</a>
+<ul class="sectlevel2">
+<li><a href="#run-a-ubuntu-container">Run a ubuntu container</a></li>
+<li><a href="#create-an-image-from-container">create an image from container</a></li>
+</ul>
+</li>
+<li><a href="#create-a-docker-image-file">create a docker image file</a></li>
+</ul>
+</div>
 </div>
 <div id="content">
-
+<div class="sect1">
+<h2 id="create-docker-image">Create Docker Image</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="run-a-ubuntu-container">Run a ubuntu container</h3>
+<div class="literalblock">
+<div class="content">
+<pre>docker container run -ti ubuntu bash</pre>
+</div>
+</div>
+<div class="ulist">
+<div class="title">what this command will do</div>
+<ul>
+<li>
+<p>Pull the docker image</p>
+</li>
+<li>
+<p>Run in it as container then continue</p>
+</li>
+<li>
+<p>to that open bash of the ubuntu container</p>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get update
+apt-get install -y figlet
+figlet "Hello Docker"</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">what are we doing at here is</div>
+<ul>
+<li>
+<p>update the apt-get inside ubuntu container bash terminal</p>
+</li>
+<li>
+<p>and install the figlet on the same container</p>
+</li>
+<li>
+<p>check the installed package by printing the simple text "Hello Docker"</p>
+<div class="literalblock">
+<div class="content">
+<pre>exit</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>docker container ls -a</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It will list all running and not running container</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>docker container diff &lt;container id&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see a list of all the files that were added or changed to in the container when you installed figlet.
+Docker keeps track of all of this information for us.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="create-an-image-from-container">create an image from container</h3>
+<div class="literalblock">
+<div class="content">
+<pre>docker container commit &lt;container id&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commit creates an image locally on the system running the Docker engine</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>docker image ls</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>will list all images</p>
+</div>
+<div class="paragraph">
+<p>Adding information to an image is known as tagging an image like name</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>docker image tag &lt;image id&gt; ourfiglet</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>RUN NEWLY CREATED IMAGE</strong></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>docker container run container_name figlet Hello</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="create-a-docker-image-file">create a docker image file</h2>
+<div class="sectionbody">
+<div class="literalblock">
+<div class="title">create simple java script file index.js</div>
+<div class="content">
+<pre>var os = require("os");
+var hostname = os.hostname();
+console.log("hello from " + hostname);</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="title">create Dockerfile</div>
+<div class="content">
+<pre>FROM alpine
+RUN apk update &amp;&amp; apk add nodejs
+COPY . /app
+WORKDIR /app
+CMD ["node","index.js"]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This Dockerfile does the following:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Specifies a base image to pull FROM - the alpine image we used in earlier labs.</p>
+</li>
+<li>
+<p>Then it RUNs two commands (apk update and apk add) inside that container which installs the Node.js server.</p>
+</li>
+<li>
+<p>Then we told it to COPY files from our working directory in to the container. The only file we have right now is our index.js.</p>
+</li>
+<li>
+<p>Next we specify the WORKDIR - the directory the container should use when it starts up</p>
+</li>
+<li>
+<p>And finally, we gave our container a command (CMD) to run when the container starts.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Let’s build our first image out of this Dockerfile and name it hello:v0.1:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>docker image build -t hello:v0.1 .</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>start container from the created image</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>docker container run hello</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>docker image history &lt;image ID&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>What you see is the list of intermediate container images that were built along the way to creating your final Node.js app image.
+Some of these intermediate images will become layers in your final container image.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>docker image inspect alpine</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Docker has an inspect command for images and it returns details on the container image,</p>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-09-06 05:48:36 IST
+Last updated 2019-09-06 06:53:03 IST
 </div>
 </div>
 </body>
